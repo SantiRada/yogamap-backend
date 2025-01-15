@@ -55,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     "description" => substr($ev['description'], 0, 40),
                     "themes" => $ev['theme'],
                     "image" => $ev['img'],
+                    "ubication" => $ev['ubication']
                 ];
             }
         }
