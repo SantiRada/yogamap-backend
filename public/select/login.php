@@ -1,5 +1,7 @@
 <?php
 require_once '../../src/db.php';
+// Importa la función sendNotification
+require_once '../../src/sendNotifications.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents("php://input"), true);
@@ -21,16 +23,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // VERIFICAR SI $user tiene resultados
         if ($user) {
-            if($user['idprof'] != null):
+            if ($user['idprof'] != null) {
                 $stmt = $pdo->prepare("SELECT * FROM prof WHERE id = :id");
                 $stmt->bindParam(':id', $user['idprof']);
                 $stmt->execute();
                 $prof = $stmt->fetch(PDO::FETCH_ASSOC);
 
+                // Enviar notificación de login exitoso
+                if (isset($user['notification_token'])) {
+                    $token = $user['notification_token'];
+                    $title = "Inicio de sesión exitoso";
+                    $content = "Bienvenido de nuevo, " . $user['mail'] . "!";
+                    $data = ["status" => "success", "message" => "Login exitoso"];
+                    sendNotification($token, $title, $content, $data);
+                }
+
                 echo json_encode(["success" => true, "message" => "Login exitoso.", "user" => $user, "prof" => $prof]);
-            else:
+            } else {
+                // Enviar notificación de login exitoso sin información de profesional
+                if (isset($user['notification_token'])) {
+                    $token = $user['notification_token'];
+                    $title = "Inicio de sesión exitoso";
+                    $content = "Bienvenido de nuevo, " . $user['mail'] . "!";
+                    $data = ["status" => "success", "message" => "Login exitoso"];
+                    sendNotification($token, $title, $content, $data);
+                }
+
                 echo json_encode(["success" => true, "message" => "Login exitoso.", "user" => $user]);
-            endif;
+            }
         } else {
             echo json_encode(["success" => false, "message" => "Correo o contraseña incorrectos."]);
             exit();
@@ -39,4 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(["success" => false, "message" => "Error: " . $e->getMessage()]);
         exit();
     }
-} else { echo json_encode(["success" => false, "message" => "Método no permitido."]); }
+} else {
+    echo json_encode(["success" => false, "message" => "Método no permitido."]);
+}
+?>

@@ -8,6 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = isset($input['pass']) ? trim($input['pass']) : null;
     $passtwo = isset($input['twoPass']) ? trim($input['twoPass']) : null;
     $type = isset($input['type']) ? trim($input['type']) : null;
+    $notification_token = isset($input['notification_token']) ? trim($input['notification_token']) : null; // Nuevo campo para el token
 
     if (empty($mail) || empty($name) || empty($password) || empty($passtwo) || empty($type)) {
         echo json_encode(["success" => false, "message" => "Todos los campos son obligatorios."]);
@@ -23,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         if($type == "users"):
-            $stmt = $pdo->prepare("INSERT INTO users (mail, name, pass) VALUES (:mail, :name, :pass)");
+            $stmt = $pdo->prepare("INSERT INTO users (mail, name, pass, notification_token) VALUES (:mail, :name, :pass, :notification_token)"); // Se añade el campo notification_token
         else:
             $stmt = $pdo->prepare("INSERT INTO prof (mail, name, pass) VALUES (:mail, :name, :pass)");
         endif;
@@ -31,6 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(':mail', $mail);
         $stmt->bindParam(':name', $name);
         $stmt->bindParam(':pass', $hashed_password);
+        if ($type == "users") {
+            $stmt->bindParam(':notification_token', $notification_token); // Enlazamos el token en la base de datos
+        }
 
         if ($stmt->execute()) {
             if($type == "prof"):
