@@ -5,6 +5,7 @@ require_once '../../../src/db.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents("php://input"), true);
     $id = isset($input['id']) ? trim($input['id']) : null;
+    $notification_token = isset($input['notification_token']) ? trim($input['notification_token']) : null; // Nuevo campo para el token
 
     if (empty($id)) {
         echo json_encode(["success" => false, "message" => "El perfil que intentas buscar no existe o ha sido eliminado."]);
@@ -12,8 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id");
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id and notification_token = :notification_token");
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->bindParam(':notification_token', $notification_token, PDO::PARAM_INT);
         
         $stmt->execute();
 

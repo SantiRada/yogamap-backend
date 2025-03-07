@@ -1,7 +1,7 @@
 <?php
 require_once '../../src/db.php';
 // Importa la función sendNotification
-require_once '../../src/sendNotifications.php';
+require_once '../../src/sendNotification.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents("php://input"), true);
